@@ -1,5 +1,5 @@
 # Slack desktop app
-# Extended jess/slack image with xauth for X11 Magic Cookie support, Pulse Audio, socat (for xdg-open-server tool), and run as `slack` user instead of root
+# With xauth for X11 Magic Cookie support, Pulse Audio, socat (for xdg-open-server tool), and run as `slack` user instead of root
 #
 # docker build -t lizards/slack .
 #
@@ -36,20 +36,49 @@
 #     lizards/slack \
 #     -c 'touch ~/.Xauthority && xauth add $XCOOKIE && /usr/lib/slack/slack --force-device-scale-factor=$DOCKER_SLACK_FORCE_DEVICE_SCALE_FACTOR'
 
-FROM jess/slack
+FROM debian:bullseye-slim
 
+ENV LC_ALL en_US.UTF-8
+ENV LANG en_US.UTF-8
 ENV HOME /home/slack
 
 RUN apt-get update && apt-get install -y \
+    apt-transport-https \
+    ca-certificates \
+    gnupg \
+    locales \
     xauth \
     socat \
     alsa-utils \
     pulseaudio \
+    libxshmfence-dev \
+    libgbm-dev \
+    libasound2 \
+    libgtk-3-0 \
+    libx11-xcb1 \
+    libxkbfile1 \
+    libappindicator3-1 \
+    libglib2.0-bin \
+    libnotify4 \
+    libnss3 \
+    libxss1 \
+    xdg-utils \
+    wget \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && useradd --create-home --home-dir $HOME slack \
-	&& chown -R slack:slack $HOME \
-	&& usermod -a -G audio,video slack
+    && chown -R slack:slack $HOME \
+    && usermod -a -G audio,video slack \
+    && echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
+    && locale-gen en_US.utf8 \
+    && /usr/sbin/update-locale LANG=en_US.UTF-8
+
+RUN echo "deb http://deb.debian.org/debian/ sid main contrib non-free" > /etc/apt/sources.list \
+    && apt update \
+    && apt install -y  \
+    && rm /etc/apt/sources.list \
+    && wget https://downloads.slack-edge.com/releases/linux/4.28.171/prod/x64/slack-desktop-4.28.171-amd64.deb \
+    && apt install -y ./slack-desktop-*-amd64.deb
 
 WORKDIR $HOME
 USER slack
