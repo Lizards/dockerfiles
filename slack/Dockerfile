@@ -77,7 +77,7 @@ RUN echo "deb http://deb.debian.org/debian/ sid main contrib non-free" > /etc/ap
     && apt update \
     && apt install -y  \
     && rm /etc/apt/sources.list \
-    && wget https://downloads.slack-edge.com/releases/linux/4.28.171/prod/x64/slack-desktop-4.28.171-amd64.deb \
+    && wget https://downloads.slack-edge.com/releases/linux/4.36.140/prod/x64/slack-desktop-4.36.140-amd64.deb \
     && apt install -y ./slack-desktop-*-amd64.deb
 
 WORKDIR $HOME
